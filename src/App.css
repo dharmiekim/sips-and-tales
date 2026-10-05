@@ -258,7 +258,7 @@ a {
   display: flex;
   align-items: center;
 
-  padding: 70px 6%;
+  padding: 125px 6% 70px;
 
   overflow: hidden;
 
@@ -1586,7 +1586,7 @@ footer p {
   }
 
   .hero {
-    padding-top: 60px;
+    padding-top: 105px;
 
     padding-bottom: 70px;
   }
