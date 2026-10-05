@@ -1,5 +1,3 @@
-import "./index.css";
-import "./App.css";
 import { useState } from "react";
 import {
   MessageCircle,
@@ -9,6 +7,7 @@ import {
   X,
 } from "lucide-react";
 import { products } from "./data/products";
+import "./App.css";
 
 const WHATSAPP_NUMBER = "2349017316232";
 
@@ -20,81 +19,119 @@ function App() {
   const [cart, setCart] = useState({});
   const [cartOpen, setCartOpen] = useState(false);
 
-  const updateQuantity = (productId, change) => {
+  const getQuantity = (productId) => {
+    return cart[productId] || 0;
+  };
+
+  const getMinimumOrder = (productId) => {
+    const product = products.find((item) => item.id === productId);
+
+    return product?.minOrder || 1;
+  };
+
+  const increaseQuantity = (productId) => {
     setCart((currentCart) => {
       const currentQuantity = currentCart[productId] || 0;
+      const minimumOrder = getMinimumOrder(productId);
 
-      const newQuantity = Math.max(
-        0,
-        currentQuantity + change
-      );
+      return {
+        ...currentCart,
+        [productId]:
+          currentQuantity === 0
+            ? minimumOrder
+            : currentQuantity + 1,
+      };
+    });
+  };
 
-      const updatedCart = { ...currentCart };
+  const decreaseQuantity = (productId) => {
+    setCart((currentCart) => {
+      const currentQuantity = currentCart[productId] || 0;
+      const minimumOrder = getMinimumOrder(productId);
 
-      if (newQuantity === 0) {
+      if (currentQuantity <= minimumOrder) {
+        const updatedCart = { ...currentCart };
         delete updatedCart[productId];
-      } else {
-        updatedCart[productId] = newQuantity;
+
+        return updatedCart;
       }
+
+      return {
+        ...currentCart,
+        [productId]: currentQuantity - 1,
+      };
+    });
+  };
+
+  const removeFromCart = (productId) => {
+    setCart((currentCart) => {
+      const updatedCart = { ...currentCart };
+      delete updatedCart[productId];
 
       return updatedCart;
     });
   };
 
-  const getQuantity = (productId) => {
-    return cart[productId] || 0;
+  const addToOrder = (productId) => {
+    setCart((currentCart) => {
+      const product = products.find(
+        (item) => item.id === productId
+      );
+
+      const minimumOrder = product?.minOrder || 1;
+
+      return {
+        ...currentCart,
+        [productId]:
+          currentCart[productId] || minimumOrder,
+      };
+    });
+
+    setCartOpen(true);
   };
 
   const selectedProducts = products.filter(
     (product) => cart[product.id]
   );
 
-  const totalItems = Object.values(cart).reduce(
-    (total, quantity) => total + quantity,
+  const totalItems = selectedProducts.reduce(
+    (total, product) => total + cart[product.id],
     0
   );
 
   const totalPrice = selectedProducts.reduce(
-    (total, product) => {
-      return (
-        total +
-        product.price * cart[product.id]
-      );
-    },
+    (total, product) =>
+      total + product.price * cart[product.id],
     0
   );
 
-  const sendOrderToWhatsApp = () => {
+  const createWhatsAppOrder = () => {
     if (selectedProducts.length === 0) {
-      setCartOpen(true);
       return;
     }
 
-    const orderLines = selectedProducts
-      .map((product) => {
-        const quantity = cart[product.id];
+    const orderLines = selectedProducts.map((product) => {
+      const quantity = cart[product.id];
+      const subtotal = product.price * quantity;
 
-        const subtotal =
-          product.price * quantity;
-
-        return `• ${product.name} × ${quantity} = ${formatPrice(
-          subtotal
-        )}`;
-      })
-      .join("\n");
+      return `${product.name}
+Quantity: ${quantity}
+Price: ${formatPrice(product.price)} each
+Subtotal: ${formatPrice(subtotal)}`;
+    });
 
     const message = `Hello SIPS AND TALES 👋
 
 I would like to place an order:
 
-${orderLines}
+${orderLines.join("\n\n")}
 
 Total items: ${totalItems}
-Total: ${formatPrice(totalPrice)}
+Total amount: ${formatPrice(totalPrice)}
 
-Please confirm my order.
+Please confirm availability and delivery details.
 
-Thank you!`;
+Thank you.`;
 
     const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
       message
@@ -103,9 +140,10 @@ Thank you!`;
     window.open(whatsappUrl, "_blank");
   };
 
-  const openWhatsApp = () => {
-    const message =
-      "Hello SIPS AND TALES 👋 I would like to make an enquiry about your drinks.";
+  const openGeneralWhatsApp = () => {
+    const message = `Hello SIPS AND TALES 👋
+
+I would like to make an enquiry about your drinks.`;
 
     const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
       message
@@ -116,7 +154,10 @@ Thank you!`;
 
   return (
     <div className="app">
-      {/* NAVBAR */}
+      {/* =========================
+          NAVBAR
+      ========================= */}
+
       <header className="navbar">
         <a href="#home" className="brand">
           <img
@@ -149,30 +190,39 @@ Thank you!`;
       </header>
 
       <main>
-        {/* HERO */}
+        {/* =========================
+            HERO
+        ========================= */}
+
         <section className="hero" id="home">
           <div className="hero-content">
-            <p className="eyebrow">
-              REFRESHMENT WITH A STORY
-            </p>
+            <p className="eyebrow">SIPS AND TALES</p>
 
             <h1>
-              Every sip has
-              <span> a story.</span>
+              <span>Good</span>{" "}
+              <span>drinks</span>{" "}
+              <span>good</span>{" "}
+              <span>stories.</span>
             </h1>
 
             <p className="hero-text">
-              Discover delicious, refreshing drinks
-              crafted to make every moment a little
-              more special.
+              Delicious tigernut drinks made with care,
+              creativity and unforgettable flavour.
             </p>
 
-            <a
-              href="#drinks"
+            <button
+              type="button"
               className="primary-button"
+              onClick={() =>
+                document
+                  .getElementById("drinks")
+                  ?.scrollIntoView({
+                    behavior: "smooth",
+                  })
+              }
             >
               Explore Our Drinks
-            </a>
+            </button>
           </div>
 
           <div className="hero-visual">
@@ -180,7 +230,7 @@ Thank you!`;
             <div className="color-orb orb-green"></div>
             <div className="color-orb orb-orange"></div>
 
-            <div className="hero-card glass-card">
+            <div className="glass-card hero-card">
               <span>
                 <video
                   src="/images/lifestyle/drink-video.mp4"
@@ -192,36 +242,45 @@ Thank you!`;
               </span>
 
               <p>
-                Made for
+                Sip something delicious.
                 <br />
-                beautiful moments
+                Tell a better tale.
               </p>
             </div>
           </div>
         </section>
 
-        {/* PRODUCTS */}
+        {/* =========================
+            PRODUCTS
+        ========================= */}
+
         <section
           className="products-section"
           id="drinks"
         >
           <div className="section-heading">
-            <p className="eyebrow">
-              OUR SIGNATURE SIPS
-            </p>
+            <p className="eyebrow">OUR DRINKS</p>
 
-            <h2>Find your favourite.</h2>
+            <h2>
+              <span>Pick</span>{" "}
+              <span>your</span>{" "}
+              <span>favourite.</span>
+            </h2>
 
             <p>
-              Choose your favourite drinks, select your
-              quantity and send your order directly to
-              WhatsApp.
+              From classic tigernut goodness to bold
+              flavours and refreshing Zobo, there is a
+              SIPS AND TALES drink for every mood.
             </p>
           </div>
 
           <div className="product-grid">
             {products.map((product) => {
               const quantity = getQuantity(product.id);
+              const minOrder = product.minOrder || 1;
+              const isSelected = quantity > 0;
+              const isMinimumQuantity =
+                quantity <= minOrder;
 
               return (
                 <article
@@ -239,61 +298,72 @@ Thank you!`;
                     <h3>{product.name}</h3>
 
                     <div className="product-price">
-                      {formatPrice(product.price)}
+                      {formatPrice(product.price)} each
                     </div>
 
-                    <p>{product.description}</p>
+                    {minOrder > 1 && (
+                      <p className="minimum-order">
+                        Minimum order: {minOrder}
+                      </p>
+                    )}
+
+                    <p className="product-description">
+                      {product.description}
+                    </p>
 
                     <div className="product-order-row">
-                      <div className="quantity-control">
-                        <button
-                          type="button"
-                          aria-label={`Decrease ${product.name}`}
-                          onClick={() =>
-                            updateQuantity(
-                              product.id,
-                              -1
-                            )
-                          }
-                        >
-                          <Minus size={15} />
-                        </button>
+                      {isSelected && (
+                        <div className="quantity-control">
+                          <button
+                            type="button"
+                            aria-label={`Decrease ${product.name} quantity`}
+                            onClick={() =>
+                              decreaseQuantity(product.id)
+                            }
+                          >
+                            <Minus size={14} />
+                          </button>
 
-                        <span>{quantity}</span>
+                          <span>{quantity}</span>
 
-                        <button
-                          type="button"
-                          aria-label={`Increase ${product.name}`}
-                          onClick={() =>
-                            updateQuantity(
-                              product.id,
-                              1
-                            )
-                          }
-                        >
-                          <Plus size={15} />
-                        </button>
-                      </div>
+                          <button
+                            type="button"
+                            aria-label={`Increase ${product.name} quantity`}
+                            onClick={() =>
+                              increaseQuantity(product.id)
+                            }
+                          >
+                            <Plus size={14} />
+                          </button>
+                        </div>
+                      )}
 
                       <button
                         type="button"
                         className={`add-order-button ${
-                          quantity > 0
-                            ? "selected"
-                            : ""
+                          isSelected ? "selected" : ""
                         }`}
                         onClick={() =>
-                          updateQuantity(
-                            product.id,
-                            quantity > 0 ? 0 : 1
-                          )
+                          isSelected
+                            ? increaseQuantity(product.id)
+                            : addToOrder(product.id)
                         }
                       >
-                        {quantity > 0
-                          ? "Added"
-                          : "Add to Order"}
+                        {isSelected
+                          ? "Add More"
+                          : minOrder > 1
+                            ? `Add ${minOrder} to Order`
+                            : "Add to Order"}
                       </button>
                     </div>
+
+                    {isSelected &&
+                      minOrder > 1 &&
+                      isMinimumQuantity && (
+                        <p className="minimum-note">
+                          Minimum quantity reached
+                        </p>
+                      )}
                   </div>
                 </article>
               );
@@ -301,30 +371,29 @@ Thank you!`;
           </div>
         </section>
 
-        {/* ABOUT */}
+        {/* =========================
+            ABOUT
+        ========================= */}
+
         <section
           className="about-section"
           id="about"
         >
-          <div className="about-card glass-card">
+          <div className="glass-card about-card">
             <div className="about-text">
-              <p className="eyebrow">
-                THE SIPS AND TALES EXPERIENCE
-              </p>
+              <p className="eyebrow">OUR STORY</p>
 
               <h2>
-                Good drinks.
-                <br />
-                Good moments.
-                <br />
-                Good stories.
+                <span>Made</span>{" "}
+                <span>with</span>{" "}
+                <span>love.</span>
               </h2>
 
               <p>
-                SIPS AND TALES brings refreshing
-                flavours together with the simple joy
-                of sharing a good drink and creating
-                memorable moments.
+                SIPS AND TALES is all about creating
+                delicious drinks that bring people
+                together. Our tigernut drinks are made
+                to be enjoyed, shared and remembered.
               </p>
             </div>
 
@@ -335,22 +404,22 @@ Thank you!`;
                 muted
                 loop
                 playsInline
-                controls
               />
             </div>
           </div>
         </section>
 
-        {/* CTA */}
+        {/* =========================
+            CTA
+        ========================= */}
+
         <section className="cta-section">
-          <p className="eyebrow">
-            READY FOR YOUR NEXT SIP?
-          </p>
+          <p className="eyebrow">READY TO SIP?</p>
 
           <h2>
-            Pick your flavour.
-            <br />
-            Start your story.
+            <span>Choose.</span>{" "}
+            <span>Order.</span>{" "}
+            <span>Enjoy.</span>
           </h2>
 
           <button
@@ -358,68 +427,80 @@ Thank you!`;
             className="primary-button cta-order-button"
             onClick={() => setCartOpen(true)}
           >
-            Shop Our Drinks
+            <ShoppingBag size={17} />
+            View Your Order
           </button>
         </section>
       </main>
 
-      {/* FOOTER */}
+      {/* =========================
+          FOOTER
+      ========================= */}
+
       <footer>
         <div>
-          <strong>SIPS & TALES</strong>
+          <strong>SIPS AND TALES</strong>
 
           <p>
-            Refreshing stories in every sip.
+            Delicious drinks. Better stories.
           </p>
         </div>
 
         <p>
-          © {new Date().getFullYear()} SIPS AND TALES
+          © {new Date().getFullYear()} SIPS AND TALES.
+          All rights reserved.
         </p>
       </footer>
 
-      {/* FLOATING WHATSAPP */}
+      {/* =========================
+          FLOATING WHATSAPP
+      ========================= */}
+
       <button
         type="button"
         className="floating-whatsapp"
-        onClick={openWhatsApp}
+        onClick={openGeneralWhatsApp}
         aria-label="Chat with SIPS AND TALES on WhatsApp"
       >
-        <MessageCircle size={27} />
+        <MessageCircle size={25} />
 
         <span className="whatsapp-tooltip">
           Chat with us
         </span>
       </button>
 
-      {/* CART */}
+      {/* =========================
+          CART
+      ========================= */}
+
       {cartOpen && (
         <div
           className="cart-overlay"
-          onClick={() => setCartOpen(false)}
-        >
-          <div
-            className="cart-panel"
-            onClick={(event) =>
-              event.stopPropagation()
+          onClick={(event) => {
+            if (
+              event.target === event.currentTarget
+            ) {
+              setCartOpen(false);
             }
-          >
+          }}
+        >
+          <aside className="cart-panel">
             <div className="cart-header">
               <div>
                 <p className="cart-eyebrow">
                   YOUR ORDER
                 </p>
 
-                <h3>Your Sips</h3>
+                <h3>Your Cart</h3>
               </div>
 
               <button
                 type="button"
                 className="close-cart"
                 onClick={() => setCartOpen(false)}
-                aria-label="Close order"
+                aria-label="Close cart"
               >
-                <X size={22} />
+                <X size={19} />
               </button>
             </div>
 
@@ -429,36 +510,30 @@ Thank you!`;
                   <ShoppingBag size={30} />
                 </div>
 
-                <h4>
-                  Your order is empty
-                </h4>
+                <h4>Your cart is empty</h4>
 
                 <p>
-                  Select your favourite drinks and
-                  choose the quantity you want.
+                  Add your favourite SIPS AND TALES
+                  drinks to start your order.
                 </p>
 
                 <button
                   type="button"
                   className="continue-shopping"
-                  onClick={() => {
-                    setCartOpen(false);
-
-                    document
-                      .getElementById("drinks")
-                      ?.scrollIntoView({
-                        behavior: "smooth",
-                      });
-                  }}
+                  onClick={() => setCartOpen(false)}
                 >
-                  Choose Drinks
+                  Continue Shopping
                 </button>
               </div>
             ) : (
               <>
                 <div className="cart-items">
-                  {selectedProducts.map(
-                    (product) => (
+                  {selectedProducts.map((product) => {
+                    const quantity = cart[product.id];
+                    const minOrder =
+                      product.minOrder || 1;
+
+                    return (
                       <div
                         className="cart-item"
                         key={product.id}
@@ -469,86 +544,76 @@ Thank you!`;
                         />
 
                         <div className="cart-item-details">
-                          <h4>
-                            {product.name}
-                          </h4>
+                          <h4>{product.name}</h4>
 
                           <span className="cart-item-price">
-                            {formatPrice(
-                              product.price
-                            )}
+                            {formatPrice(product.price)} each
                           </span>
+
+                          {minOrder > 1 && (
+                            <small className="cart-item-moq">
+                              Minimum: {minOrder}
+                            </small>
+                          )}
 
                           <div className="cart-quantity">
                             <button
                               type="button"
+                              aria-label={`Decrease ${product.name} quantity`}
                               onClick={() =>
-                                updateQuantity(
-                                  product.id,
-                                  -1
+                                decreaseQuantity(
+                                  product.id
                                 )
                               }
-                              aria-label={`Decrease ${product.name} quantity`}
                             >
-                              <Minus size={13} />
+                              <Minus size={12} />
                             </button>
 
-                            <span>
-                              {cart[product.id]}
-                            </span>
+                            <span>{quantity}</span>
 
                             <button
                               type="button"
+                              aria-label={`Increase ${product.name} quantity`}
                               onClick={() =>
-                                updateQuantity(
-                                  product.id,
-                                  1
+                                increaseQuantity(
+                                  product.id
                                 )
                               }
-                              aria-label={`Increase ${product.name} quantity`}
                             >
-                              <Plus size={13} />
+                              <Plus size={12} />
                             </button>
                           </div>
                         </div>
 
-                        <div className="cart-item-subtotal">
+                        <span className="cart-item-subtotal">
                           {formatPrice(
-                            product.price *
-                              cart[product.id]
+                            product.price * quantity
                           )}
-                        </div>
+                        </span>
 
                         <button
                           type="button"
                           className="remove-item"
                           onClick={() =>
-                            updateQuantity(
-                              product.id,
-                              -cart[product.id]
-                            )
+                            removeFromCart(product.id)
                           }
                           aria-label={`Remove ${product.name}`}
                         >
-                          <X size={16} />
+                          <X size={13} />
                         </button>
                       </div>
-                    )
-                  )}
+                    );
+                  })}
                 </div>
 
                 <div className="cart-summary">
                   <div>
                     <span>Total items</span>
-
-                    <strong>
-                      {totalItems}
-                    </strong>
+                    <strong>{totalItems}</strong>
                   </div>
 
                   <div className="cart-total">
                     <span>Total</span>
-
                     <strong>
                       {formatPrice(totalPrice)}
                     </strong>
@@ -558,23 +623,19 @@ Thank you!`;
                 <button
                   type="button"
                   className="whatsapp-checkout"
-                  onClick={
-                    sendOrderToWhatsApp
-                  }
+                  onClick={createWhatsAppOrder}
                 >
-                  <MessageCircle size={20} />
-
-                  Send Order on WhatsApp
+                  <MessageCircle size={18} />
+                  Place Order on WhatsApp
                 </button>
 
                 <p className="checkout-note">
-                  Your selected products, quantities
-                  and prices will be sent to SIPS AND
-                  TALES on WhatsApp.
+                  Your order will be sent to SIPS AND
+                  TALES on WhatsApp for confirmation.
                 </p>
               </>
             )}
-          </div>
+          </aside>
         </div>
       )}
     </div>

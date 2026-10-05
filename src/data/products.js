@@ -7,8 +7,8 @@ export const products = [
     price: 3000,
     image: "/images/products/classic-tigernut.jpg",
     accent: "orange",
+    minOrder: 1,
   },
-
   {
     id: 2,
     name: "Beetroot Tigernut",
@@ -18,8 +18,8 @@ export const products = [
     price: 4500,
     image: "/images/products/beetroot-tigernut.jpg",
     accent: "red",
+    minOrder: 1,
   },
-
   {
     id: 3,
     name: "Chocolush Tigernut",
@@ -29,8 +29,8 @@ export const products = [
     price: 4000,
     image: "/images/products/chocolush-tigernut.jpg",
     accent: "blue",
+    minOrder: 1,
   },
-
   {
     id: 4,
     name: "Banana Flavour Tigernut",
@@ -40,8 +40,8 @@ export const products = [
     price: 3500,
     image: "/images/products/banana-tigernut.jpg",
     accent: "yellow",
+    minOrder: 1,
   },
-
   {
     id: 5,
     name: "Zobo",
@@ -51,5 +51,41 @@ export const products = [
     price: 2000,
     image: "/images/products/zobo.jpg",
     accent: "green",
+    minOrder: 1,
+  },
+
+  // MOQ PRODUCTS
+  {
+    id: 6,
+    name: "Beetroot Tigernut Pouch",
+    slug: "beetroot-tigernut-pouch",
+    description:
+      "A vibrant beetroot tigernut drink in a convenient pouch.",
+    price: 1500,
+    image: "/images/products/beetroot-tigernut-pouch.jpg",
+    accent: "red",
+    minOrder: 20,
+  },
+  {
+    id: 7,
+    name: "Banana Tigernut Pouch",
+    slug: "banana-tigernut-pouch",
+    description:
+      "Creamy banana flavoured tigernut drink in a convenient pouch.",
+    price: 1500,
+    image: "/images/products/banana-tigernut-pouch.jpg",
+    accent: "yellow",
+    minOrder: 20,
+  },
+  {
+    id: 8,
+    name: "Small Classic Bottle Drink",
+    slug: "small-classic-bottle",
+    description:
+      "Our smooth classic tigernut drink in a smaller bottle.",
+    price: 2000,
+    image: "/images/products/small-classic-bottle.jpg",
+    accent: "green",
+    minOrder: 20,
   },
 ];
