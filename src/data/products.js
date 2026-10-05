@@ -53,8 +53,6 @@ export const products = [
     accent: "green",
     minOrder: 1,
   },
-
-  // MOQ PRODUCTS
   {
     id: 6,
     name: "Beetroot Tigernut Pouch",
@@ -62,7 +60,7 @@ export const products = [
     description:
       "A vibrant beetroot tigernut drink in a convenient pouch.",
     price: 1500,
-    image: "/images/products/beetroot-tigernut-pouch.jpg",
+    image: "/images/products/Beetroot Tigernut Pouch.jpg",
     accent: "red",
     minOrder: 20,
   },
@@ -73,7 +71,7 @@ export const products = [
     description:
       "Creamy banana flavoured tigernut drink in a convenient pouch.",
     price: 1500,
-    image: "/images/products/banana-tigernut-pouch.jpg",
+    image: "/images/products/Banana Tigernut Pouch.jpg",
     accent: "yellow",
     minOrder: 20,
   },
@@ -84,7 +82,7 @@ export const products = [
     description:
       "Our smooth classic tigernut drink in a smaller bottle.",
     price: 2000,
-    image: "/images/products/small-classic-bottle.jpg",
+    image: "/images/products/Small Classic Bottle Drink.jpg",
     accent: "green",
     minOrder: 20,
   },
