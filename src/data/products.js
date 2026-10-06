@@ -59,7 +59,7 @@ export const products = [
     slug: "beetroot-tigernut-pouch",
     description:
       "A vibrant beetroot tigernut drink in a convenient pouch.",
-    price: 1500,
+    price: 2500,
     image: "/images/products/Beetroot Tigernut Pouch.jpg",
     accent: "red",
     minOrder: 20,
